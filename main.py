@@ -22,4 +22,12 @@ while opcUser != 6:
             if conta.logou != True:
                 conta.AcessarConta()
                 conta.FazerSaque()
+            else:
+                conta.FazerSaque()
+        case 4:
+            ...
+        case 5:
+            ...
+        case 6:
+            print("Saindo....")
             

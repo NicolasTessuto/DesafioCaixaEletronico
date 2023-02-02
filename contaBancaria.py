@@ -65,7 +65,8 @@ class ContaPessoaFisica:
         agenciaDep = input("Informe a agência para depósito: ")
         self.BuscarContaNoBD(contaDep, agenciaDep)
         valor = float(input("Digite o valor que está no envelope: "))
-        acessaOBanco.entradaDeDinheiro(contaDep, valor)
+        acessaOBanco.entradaDeDinheiro(valor, contaDep, agenciaDep)
+        print("Depósito realizado...")
 
     def ValidarSenha(self, numContaEntrada, agenciaContaEntrada, senhaEntrada):
         retorno = False

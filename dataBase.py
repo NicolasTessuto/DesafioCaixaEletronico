@@ -19,9 +19,9 @@ class ContasBancariasDB:
         self.cursor.execute(consulta, (numConta, agencia))
         return self.cursor.fetchone()
     
-    def entradaDeDinheiro(self, valor, conta):
-        consulta = 'UPDATE contasBancarias SET saldo = saldo + ? WHERE numeroConta = ?'
-        self.cursor.execute(consulta, (valor, conta))
+    def entradaDeDinheiro(self, valor, conta, agencia):
+        consulta = 'UPDATE contasBancarias SET saldo = saldo + ? WHERE numeroConta = ? AND agencia = ?'
+        self.cursor.execute(consulta, (valor, conta, agencia))
         self.conexao.commit()
     
     def verificaSenha(self, numConta, agencia, senha):
