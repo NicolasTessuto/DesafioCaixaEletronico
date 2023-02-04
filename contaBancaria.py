@@ -45,23 +45,12 @@ class ContaPessoaFisica:
         print("Agência: ["+ self.agencia + "]")
         print("Número da conta [" + str(self.numeroConta) + "]")
     
-    def BuscarContaNoBD(self, numContaEntrada, agencia):
-        #ERRO AQUI#
-        retorno = False
-        while acessaOBanco.VerificaContaPeloNum(numContaEntrada, agencia) == None:
-            tentarNovamente = input("Conta não encontrada...\nTentar novamente? [S]im [N]ão: ")
-            if tentarNovamente == 's' or tentarNovamente == 'S':
-                tentativaNumConta = input("Informe a conta: ")
-                tentativaAgencia = input("Informe a agencia: ")
-                acessaOBanco.VerificaContaPeloNum(tentativaNumConta, tentativaAgencia)
-            elif tentarNovamente == 'n' or tentarNovamente == 'N':
-                retorno = False
-            else:
-                print("Opção inválida...")
-                retorno = False
-        else: 
-            retorno =  True
-        return retorno
+    def BuscarContaNoBD(self, numContaDigitada, agenciaContaDigitada):
+        if acessaOBanco.VerificaContaPeloNum(numContaDigitada, agenciaContaDigitada) == None:
+            return False
+        else:
+            return True
+
 
     def FazerDeposito(self):
         self.numContaDigitada = input("Informe a conta para depósito: ")
@@ -73,6 +62,8 @@ class ContaPessoaFisica:
             else:
                 acessaOBanco.EntradaDeDinheiro(valor, self.numContaDigitada, self.agenciaContaDigitada)
                 print("Depósito realizado...")
+        else:
+            print("Contra não encontrada na base de dados...")
 
     def ValidarSenha(self, numContaEntrada, agenciaContaEntrada, senhaEntrada):
         retorno = False
