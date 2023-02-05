@@ -29,7 +29,6 @@ class ContasBancariasDB:
         self.cursor.execute(consulta, (numContaDigitada, agenciaContaDigitada, senha))
         return self.cursor.fetchone()
         
-
     def ExibirSaldo(self, numContaDigitada, agenciaContaDigitada):
         consulta = 'SELECT saldo FROM contasBancarias WHERE numeroConta = ? AND agencia = ?'
         self.cursor.execute(consulta, (numContaDigitada, agenciaContaDigitada))

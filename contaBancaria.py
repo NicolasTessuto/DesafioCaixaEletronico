@@ -1,34 +1,47 @@
-#SMART-BANK
-
 import random
 import sqlite3
 import dataBase
+import json
 
 arquivoBanco = '/home/nicolas/DEV/curso_python/DesafioCaixaEletronico/caixaEletronico.db'
 acessaOBanco = dataBase.ContasBancariasDB(arquivoBanco)
 
-
 class ContaPessoaFisica:
-
-    logou = False
-    numContaDigitada = ''
-    agenciaContaDigitada = ''
 
     def __init__(self):
         self.logou = False       
         self.agencia = "3966"
+        logou = False
+        numContaDigitada = ''
+        agenciaContaDigitada = ''
 
     def CriarConta(self):
         self.numeroConta = random.randint(1,599)
-        self.nomeCompleto = input("Digite o nome do titular: ")
-        self.cpf = input("Digite o cpf do titular: ")
+        self.nomeCompleto = input("Digite o nome do titular:")
+        condicaoNome = self.nomeCompleto.isalpha()
+        while condicaoNome is False:
+            self.nomeCompleto = input("Tente novamente, nomes não possuem números!")
+            condicaoNome = self.nomeCompleto.isalpha()
+        self.cpf = input("Digite o cpf do titular (Exemplo: 000.000.000-20):")
+        if self.ValidaCpf(self.cpf) is False:
+            self.cpf = input("CPF inválido, tente novamente: ")
+            self.ValidaCpf(self.cpf)
         self.senha = input("Digite a senha de 6 digitos (apenas números): ")
-        condicaoSenhaCorreta = (len(self.senha) < 7 and len(self.senha) > 5 and self.senha.isdigit)
-        while(condicaoSenhaCorreta is False):
+        condicaoSenha = (len(self.senha) < 7 and len(self.senha) > 5 and self.senha.isdigit)
+        while(condicaoSenha is False):
             self.senha = input("Tente novamente lembrando (6 digitos apenas números): ")
-            condicaoSenhaCorreta = (len(self.senha) < 7 and len(self.senha) > 5 and self.senha.isdigit)
+            condicaoSenha = (len(self.senha) < 7 and len(self.senha) > 5 and self.senha.isdigit)
         self.saldo = 0
         acessaOBanco.SalvarContaAoBanco(self)
+
+    def ValidaCpf(self, cpf):
+        
+        cpf = ''.join(filter(str.isdigit, cpf))
+        
+        if len(cpf) != 11:
+            return False
+        else:
+            return True
 
     def ExibirContaComSaldo(self):
         print(f"Parabêns Sr(a) {self.nomeCompleto}, sua conta foi criada com os seguintes dados:")
@@ -50,7 +63,6 @@ class ContaPessoaFisica:
             return False
         else:
             return True
-
 
     def FazerDeposito(self):
         self.numContaDigitada = input("Informe a conta para depósito: ")
@@ -141,13 +153,13 @@ class ContaPessoaFisica:
             numContaTransf = input("Informe o NÚMERO da conta que deseja transferir: ")
             agenciaContaTransf = input("Informe a AGENCIA da conta que deseja transferir: ")
             if self.BuscarContaNoBD(numContaTransf, agenciaContaTransf) == True:
-                valorTransf = int(input("Informe o VALOR que deseja transferir: "))
+                valorTransf = float(input("Informe o VALOR que deseja transferir: "))
                 senhaDigitada = input("Entre com a senha da sua conta: ")
                 acessaOBanco.TransferenciaEntreContas(valorTransf, self.numContaDigitada, self.agenciaContaDigitada, senhaDigitada, numContaTransf, agenciaContaTransf)
                 print("Transferência realizada com sucesso!")
                 if valorTransf <= 0:
                     print("Valor inválido...")
-                elif valorTransf > int(self.RetornaSaldo(self.numContaDigitada, self.agenciaContaDigitada)):
+                elif valorTransf > float(self.RetornaSaldo(self.numContaDigitada, self.agenciaContaDigitada)):
                     entradaChEspecial = input("Caso realize essa tranferência você entrará no cheque especial, continuar?\n[S]im [N]ão")
                     if(entradaChEspecial == 's' or entradaChEspecial == 'S'):
                         senhaDigitada = input("Entre com a senha da sua conta: ")
@@ -163,6 +175,14 @@ class ContaPessoaFisica:
         else:
             self.AcessarConta()
             self.FazerTransferencia()
+    
+    def Dados(self):
+        if self.logou == True:
+            with open('dadosConta.json', 'w') as json_file:
+                json.dump(acessaOBanco.VerificaContaPeloNum(self.numContaDigitada, self.agenciaContaDigitada), json_file, indent = 4)
+        else:
+            self.AcessarConta()
+            self.Dados()
 
     def __repr__(self):
         return str(self.__dict__)
