@@ -2,6 +2,7 @@ import random
 import sqlite3
 import dataBase
 import json
+import re
 
 arquivoBanco = '/home/nicolas/DEV/curso_python/DesafioCaixaEletronico/caixaEletronico.db'
 acessaOBanco = dataBase.ContasBancariasDB(arquivoBanco)
@@ -15,48 +16,70 @@ class ContaPessoaFisica:
         numContaDigitada = ''
         agenciaContaDigitada = ''
 
-    def CriarConta(self):
-        self.numeroConta = random.randint(1,599)
-        self.nomeCompleto = input("Digite o nome do titular:")
-        condicaoNome = self.nomeCompleto.isalpha()
-        while condicaoNome is False:
-            self.nomeCompleto = input("Tente novamente, nomes não possuem números!")
-            condicaoNome = self.nomeCompleto.isalpha()
-        self.cpf = input("Digite o cpf do titular (Exemplo: 000.000.000-20):")
-        if self.ValidaCpf(self.cpf) is False:
-            self.cpf = input("CPF inválido, tente novamente: ")
-            self.ValidaCpf(self.cpf)
-        self.senha = input("Digite a senha de 6 digitos (apenas números): ")
-        condicaoSenha = (len(self.senha) < 7 and len(self.senha) > 5 and self.senha.isdigit)
-        while(condicaoSenha is False):
-            self.senha = input("Tente novamente lembrando (6 digitos apenas números): ")
-            condicaoSenha = (len(self.senha) < 7 and len(self.senha) > 5 and self.senha.isdigit)
-        self.saldo = 0
-        acessaOBanco.SalvarContaAoBanco(self)
-
-    def ValidaCpf(self, cpf):
-        
-        cpf = ''.join(filter(str.isdigit, cpf))
-        
-        if len(cpf) != 11:
+    def VerificaCpfCadastrado(self, cpf):
+        if acessaOBanco.VerificaContaPeloCpf(cpf) == None:
             return False
         else:
             return True
 
-    def ExibirContaComSaldo(self):
-        print(f"Parabêns Sr(a) {self.nomeCompleto}, sua conta foi criada com os seguintes dados:")
-        print("Nome: [" + self.nomeCompleto + "]")
-        print("CPF: [" + self.cpf + "]")
-        print("Agência: ["+ self.agencia + "]")
-        print("Número da conta [" + str(self.numeroConta) + "]")
-        print("Saldo da conta [" + str(self.saldo) + "]")
+    def ValidaNome(self, nome):
+        for char in nome:
+            if not (char.isalpha() or char.isspace()):
+                return False
+        return True
 
-    def ExibirContaSemSaldo(self):
-        print(f"Parabêns Sr(a) {self.nomeCompleto}, sua conta foi criada com os seguintes dados:")
-        print("Nome: [" + self.nomeCompleto + "]")
-        print("CPF: [" + self.cpf + "]")
-        print("Agência: ["+ self.agencia + "]")
-        print("Número da conta [" + str(self.numeroConta) + "]")
+    def CriarConta(self):
+        self.numeroConta = random.randint(1,599)
+        self.nomeCompleto = input("Digite o nome do titular:")
+        while self.ValidaNome(self.nomeCompleto) == False:
+            tentarNovamente = input("Nome Inválido, tentar novamente?\n[S]im, [N]ão:")
+            if tentarNovamente == 'S' or tentarNovamente == 's':
+                self.nomeCompleto = input("Digite novamente:")
+                self.ValidaNome(self.nomeCompleto)
+        self.cpf = input("Digite o cpf do titular (Exemplo: 000.000.000-00):")
+        while self.ValidaCpf(self.cpf) is False:
+            tentarNovamente = input("CPF inválido, tentar novamente?\n[S]im [N]ão: ")
+            if tentarNovamente == 'S' or tentarNovamente == 's':
+                self.cpf = input("Digite novamente:")
+                self.ValidaCpf(self.cpf)
+        if self.VerificaCpfCadastrado(self.cpf) == False:
+            self.senha = input("Digite a senha de 6 digitos (apenas números): ")
+            condicaoSenha = (len(self.senha) < 7 and len(self.senha) > 5 and self.senha.isdigit)
+            while(condicaoSenha is False):
+                self.senha = input("Tente novamente lembrando (6 digitos apenas números): ")
+                condicaoSenha = (len(self.senha) < 7 and len(self.senha) > 5 and self.senha.isdigit)
+            self.saldo = 0
+            acessaOBanco.SalvarContaAoBanco(self)
+            self.ExibirConta()
+        else:
+            print("CPF já cadastrado no banco!")
+        print("\n")
+
+    def ValidaCpf(self, cpf):
+        cpf = ''.join(filter(str.isdigit, cpf))
+        
+        if len(cpf) != 11:
+            return False
+        
+        if all(digit == cpf[0] for digit in cpf):
+            return False
+
+        def valida(cpf: str, peso: int) -> int:
+            soma = sum(int(digit) * peso for digit, peso in zip(cpf, range(peso, 1, -1)))
+            digito = 11 - soma % 11
+            return 0 if digito > 9 else digito
+        
+        digito1 = valida(cpf[:-2], 10)
+        digito2 = valida(cpf[:-1] + str(digito1), 11)
+
+        return cpf[-2:] == str(digito1) + str(digito2)
+        
+
+    def ExibirConta(self):
+        print(f"Parabêns Sr(a) {self.nomeCompleto}, sua conta foi criada com os seguintes dados:\n"+
+        "Nome: [" + self.nomeCompleto + "]\nCPF: [" + self.cpf + "]\nAgência: ["+ self.agencia + "]\n"+
+        "Número da conta [" + str(self.numeroConta) + "] Saldo da conta [" + str(self.saldo) + "]")
+
     
     def BuscarContaNoBD(self, numContaDigitada, agenciaContaDigitada):
         if acessaOBanco.VerificaContaPeloNum(numContaDigitada, agenciaContaDigitada) == None:

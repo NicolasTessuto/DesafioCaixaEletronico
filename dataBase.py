@@ -18,6 +18,11 @@ class ContasBancariasDB:
         consulta = 'SELECT * FROM contasBancarias WHERE numeroConta = ? AND agencia = ?'
         self.cursor.execute(consulta, (numContaDigitada, agenciaContaDigitada))
         return self.cursor.fetchone()
+
+    def VerificaContaPeloCpf(self, cpf):
+        consulta = 'SELECT * FROM contasBancarias WHERE cpf = ?'
+        self.cursor.execute(consulta, (cpf,))
+        return self.cursor.fetchone()
     
     def EntradaDeDinheiro(self, valor, numContaDigitada, agenciaContaDigitada):
         consulta = 'UPDATE contasBancarias SET saldo = saldo + ? WHERE numeroConta = ? AND agencia = ?'

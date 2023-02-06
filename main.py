@@ -15,7 +15,6 @@ class MenuPrincipal:
                         conta.Dados()
                     case 1:
                         conta.CriarConta()
-                        conta.ExibirContaComSaldo()
                     case 2:
                         conta.FazerDeposito()
                     case 3:
@@ -26,7 +25,6 @@ class MenuPrincipal:
                         conta.DeletarConta()
                     case 6:
                         print("Saindo....")
-
             except ValueError:
                 print("Opção inválida, por favor digite apenas números")
 
